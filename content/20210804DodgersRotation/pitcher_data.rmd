@@ -1,0 +1,62 @@
+---
+title: "Kershaw, Scherzer, Price, Hamels"
+author: "Derek Sollberger"
+date: "8/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("kableExtra")
+library("tidyverse")
+```
+
+Just for fun, I want to compute a line of statistics for the Dodgers' pitchers Clayton Kershaw, Max Scherzer, David Price, and Cole Hamels; but back in the 2011, 2012 and 2013 seasons (arguably when they were in their prime and winning Cy Young awards).
+
+# Data
+
+Source: Baseball Reference
+
+* https://www.baseball-reference.com/players/k/kershcl01.shtml
+* https://www.baseball-reference.com/players/s/scherma01.shtml
+* https://www.baseball-reference.com/players/p/priceda01.shtml
+* https://www.baseball-reference.com/players/h/hamelco01.shtml
+
+```{r, message = FALSE, warning = FALSE}
+pitcher_df <- read_csv("pitcher_data.csv")
+```
+
+```{r}
+pitcher_df %>%
+  kbl() %>%
+  kable_paper("hover", full_width = F)
+```
+
+# Baseball Stats
+
+Next, I want to add up the pitchers' stats by season and compute the ERA (earned run average)
+
+```{r}
+pitcher_sums <- pitcher_df %>%
+  group_by(season) %>%
+  summarize(totalW = sum(W),
+            totalL = sum(L),
+            totalER = sum(ER),
+            totalIP = sum(IP))
+
+pitcher_sums <- pitcher_sums %>%
+  mutate(ERA = 9*totalER / totalIP)
+```
+
+Now let us condense the information for a tweet
+
+```{r}
+display_df <- pitcher_sums %>% select(season, totalW, totalL, ERA)
+
+colnames(display_df) <- c("season", "W", "L", "ERA")
+
+display_df %>%
+  kbl() %>%
+  kable_paper("hover", full_width = F)
+```
+
