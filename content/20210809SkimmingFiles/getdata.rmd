@@ -1,0 +1,37 @@
+---
+title: "get data"
+author: "Derek Sollberger"
+date: "8/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("tidyverse")
+```
+
+```{r}
+# https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-07-06/readme.md
+holidays <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-06/holidays.csv')
+
+# https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-07-13/readme.md
+scoobydoo <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-13/scoobydoo.csv')
+
+# https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-07-20/readme.md
+drought <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-20/drought.csv')
+
+# https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-07-27/readme.md
+olympics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-27/olympics.csv')
+
+# https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-08-03/readme.md
+athletes <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-08-03/athletes.csv')
+```
+
+```{r}
+write_csv(drought, "droughts.csv")
+write_csv(holidays, "holidays.csv")
+write_csv(olympics, "olympics.csv")
+write_csv(athletes, "paraolympics.csv")
+write_csv(scoobydoo, "scoobydoo.csv")
+```
+
