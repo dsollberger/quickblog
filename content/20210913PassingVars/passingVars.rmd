@@ -1,0 +1,51 @@
+---
+title: "Passing Variables"
+author: "Derek Sollberger"
+date: "9/13/2021"
+output: html_document
+---
+
+```{r, message = FALSE, warning = FALSE}
+library("palmerpenguins")
+library("patchwork")
+library("tidyverse")
+```
+
+For a project, I finally needed to learn how to pass column names for `ggplot` and `dplyr` commands.  Here, I will try out these ideas on the `penguins` data set from the `palmerpenguins` package.
+
+```{r}
+str(penguins)
+df <- penguins #prefer to make a copy
+df$year <- factor(df$year,
+                  levels = c("2007", "2008", "2009"))
+```
+
+Let us make boxplots, but over the 4 categorical variables: `species`, `island`, `sex`, and `year`.  Normally, I would make one graph, copy-and-paste, and change the variable names manually.
+
+What if we made a skeleton code block?
+
+```{r}
+boxplot_by_group <- function(data, metric, group){
+  data %>%
+    ggplot(aes(x = .data[[group]], y = .data[[metric]],
+               fill = .data[[group]])) +
+    geom_boxplot(color = "black") +
+    theme_minimal()
+}
+```
+
+For now, it seems that using `.data[[_____]]` with carefully worded local variables does the job well.  Then perhaps we can make 4 graphs simply with
+
+```{r}
+p1 <- boxplot_by_group(df, "flipper_length_mm", "species")
+p2 <- boxplot_by_group(df, "flipper_length_mm", "island")
+p3 <- boxplot_by_group(df, "flipper_length_mm", "sex")
+p4 <- boxplot_by_group(df, "flipper_length_mm", "year")
+```
+
+Finally, here is our `patchwork` image.
+
+```{r}
+(p1 + p2) / (p3 + p4)
+```
+
