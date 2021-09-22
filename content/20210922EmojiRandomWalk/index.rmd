@@ -1,0 +1,89 @@
+---
+title: "emoji"
+author: "Derek Sollberger"
+date: "9/22/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+library("emoji")
+library("tidyverse")
+knitr::opts_chunk$set(echo = TRUE)
+
+timesteps <- 60 #one time step can be set to 1 second
+```
+
+https://emilhvitfeldt.github.io/emoji/reference/index.html
+
+# Overview
+
+```{r}
+emoji::emojis %>%
+  select(emoji, name, group) %>%
+  sample_frac(0.10)
+```
+
+# Arrows
+
+```{r}
+get_arrow <- function(v_x = 0, v_y = 0){
+  this_arrow <- emoji::emoji("repeat")
+  if(v_x == 1){
+    if(v_y == -1){ this_arrow <- emoji::arrow("down-right") }
+    if(v_y == 0){  this_arrow <- emoji::arrow("right") }
+    if(v_y == 1){  this_arrow <- emoji::arrow("up-right") }
+  }
+  if(v_x == -1){
+    if(v_y == -1){ this_arrow <- emoji::arrow("down-left") }
+    if(v_y == 0){  this_arrow <- emoji::arrow("left") }
+    if(v_y == 1){  this_arrow <- emoji::arrow("up-left") }
+  }
+  if(v_x == 0){
+    if(v_y == -1){ this_arrow <- emoji::arrow("down") }
+    if(v_y == 0){  this_arrow <- emoji::emoji("repeat") }
+    if(v_y == 1){  this_arrow <- emoji::arrow("up") }
+  }
+  
+  #return
+  this_arrow
+}
+```
+
+
+# Random Walk
+
+```{r}
+x <- 0
+y <- 0
+
+for(i in 1:timesteps){
+  v_x <- sample(c(-1, 0, 1), 1)
+  v_y <- sample(c(-1, 0, 1), 1)
+  
+  this_emoji <- get_arrow(v_x, v_y)
+  
+  df <- data.frame(x, y, v_x, v_y, this_emoji)
+  
+  this_plot <- df %>%
+    ggplot(aes(x = x, y = y, label = this_emoji)) +
+    geom_text() +
+    labs(title = "Random Walk",
+         subtitle = "emoji package",
+         caption = "Derek Sollberger") +
+    xlim(-1, 5) +
+    ylim(-1, 5) +
+    theme_minimal()
+  
+  ggsave(filename = paste0("images/", i, ".jpg"),
+         plot = this_plot,
+         device = "jpeg",
+         width = 800, height = 600, units = "px")
+  
+  x <- (x + v_x) %% 5
+  y <- (y + v_y) %% 5
+}
+```
+
+then used EZGIFmaker to create the animation (if anyone reads this, I find making an animated GIF through a 3rd-party app is faster than using the `gganimate` package)
