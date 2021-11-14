@@ -1,0 +1,119 @@
+---
+title: "skim multiple files"
+author: "Derek Sollberger"
+date: "8/8/2021"
+output:
+  html_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("kableExtra")
+library("skimr")
+library("tidyverse")
+```
+
+In this post, I hope to find code that will allow me to run the `skim` function from the [skimr](https://cran.r-project.org/web/packages/skimr/index.html) package on multiple files that exist in a directory
+
+# Data
+
+For practice, I loaded 5 recent sample data sets from TidyTuesday
+
+```{r, eval = FALSE}
+# https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-07-06/readme.md
+holidays <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-06/holidays.csv')
+
+# https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-07-13/readme.md
+scoobydoo <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-13/scoobydoo.csv')
+
+# https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-07-20/readme.md
+drought <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-20/drought.csv')
+
+# https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-07-27/readme.md
+olympics <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-07-27/olympics.csv')
+
+# https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-08-03/readme.md
+athletes <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-08-03/athletes.csv')
+```
+
+and wrote them into a directory
+
+```{r, eval = FALSE}
+write_csv(drought, "droughts.csv")
+write_csv(holidays, "holidays.csv")
+write_csv(olympics, "olympics.csv")
+write_csv(athletes, "paraolympics.csv")
+write_csv(scoobydoo, "scoobydoo.csv")
+```
+
+so that I have multiple CSV files in the same place.
+
+# One file
+
+```{r, message = FALSE, warning = FALSE}
+# load a file
+drought <- read_csv("droughts.csv")
+
+# skim a file
+skim(drought)
+```
+
+The `skim` function quickly produces data statistics about the numerical and categorical variables in the file and produces useful diagnostic information (such as the number of missing values and histograms of the numerical variables).
+
+# Functionality
+
+Next, I think I will need to make a helper function that loads and skims a data file.
+
+```{r}
+skim_a_file <- function(file_name){
+  # This function will load and skim a file using the skimr package
+  # INPUT: file name (as a string)
+  # OUTPUT: none (displays information instead)
+  print(file_name)
+  this_file <- read_csv(file_name)
+  skim(this_file)
+}
+```
+
+# Multiple Files
+
+Following the advice over at Stack Overflow
+
+* https://stackoverflow.com/questions/63366154/how-to-do-same-function-on-every-file-in-a-folder-in-r
+
+we can simply use the `map` function from the `purrr` package to apply the `skim_a_file` function to each data file.
+
+```{r, eval = TRUE, message = FALSE, warning = FALSE}
+list.files(pattern = "\\.csv") %>%
+  map(skim_a_file)
+```
+
+However, I think I will revert back down to a `for` loop so that I can easily display file names and insert page breaks.
+
+```{r, eval = FALSE, message = FALSE, warning = FALSE}
+# using a regular expression to restrict search to CSV files (i.e. avoid my script and output files)
+list_of_files <- list.files(pattern = "\\.csv")
+
+for(file_name in list_of_files){
+  print(file_name)
+  this_df <- readr::read_csv(file_name)
+  this_skim <- skimr::skim(this_df)
+  print(this_skim)
+  
+  # trying to display skim results in a nice way using the kable package
+  #this_skim %>% skimr::kable()
+  
+  # trying to display skim results in a nice way using the kableExtra package
+  #this_nice_table <- this_skim %>%
+  #  kbl() %>%
+  #  kable_styling()
+  #print(this_nice_table)
+
+  #https://stackoverflow.com/questions/31830974/inserting-a-page-break-within-a-code-chunk-in-rmarkdown-converting-to-pdf
+  #cat("\n\n\\pagebreak\n") 
+}
+```
+
